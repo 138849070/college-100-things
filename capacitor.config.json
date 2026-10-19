@@ -1,0 +1,8 @@
+{
+  "appId": "com.college100.things",
+  "appName": "100件小事",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
