@@ -18,6 +18,22 @@
 
 安装后就是一个独立全屏的 App，和原生应用体验一致。
 
+## 🤖 Android APK
+
+已发布打包好的安装包：[Releases → v1.0.0](https://github.com/138849070/college-100-things/releases/tag/v1.0.0)
+
+下载 `大学100件小事-v1.0.0.apk` 传到手机安装即可（Android 7.0+，需允许「未知来源应用」安装）。
+
+自行重新打包：
+
+```bash
+npm install
+npx cap add android
+npx cap sync android
+cd android && ./gradlew assembleDebug
+# 产物：android/app/build/outputs/apk/debug/app-debug.apk
+```
+
 ## 🌐 在线使用
 
 已启用 GitHub Pages，直接访问：
