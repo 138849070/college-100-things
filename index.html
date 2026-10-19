@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
+<title>大学四年，想做的 100 件小事</title>
+<meta name="theme-color" content="#f7f3ea">
+<meta name="description" content="大学四年，想做的 100 件小事 —— 可离线使用的打卡手账">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="100件小事">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<style>
+  :root{
+    --bg:#fafafa;
+    --paper:#ffffff;
+    --ink:#2b2b2b;
+    --ink-soft:#6b6b6b;
+    --ink-faint:#9a9a9a;
+    --line:#ececec;
+    --line-soft:#f2f2f2;
+    --c-todo-bg:#f0f0f0;   --c-todo-tx:#8a8a8a; --c-todo-bd:#e3e3e3;
+    --c-wait-bg:#e3effa;   --c-wait-tx:#5c86ad; --c-wait-bd:#d3e4f5;
+    --c-done-bg:#faf0d6;   --c-done-tx:#a3803a; --c-done-bd:#f0e2bb;
+    --c-later-bg:#e7e3f0;  --c-later-tx:#8375a3; --c-later-bd:#d8d2e8;
+    --accent:#7c9cbf;
+    --radius:10px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{max-width:100%;overflow-x:hidden;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:14px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .serif{font-family:Georgia,"Times New Roman","Songti SC","SimSun",serif;}
+  ::selection{background:#dcebf7;}
+
+  .wrap{max-width:980px;margin:0 auto;padding:0 20px 80px;}
+
+  /* ---------- 顶部导航 ---------- */
+  header.site{
+    position:sticky;top:0;z-index:50;
+    background:rgba(250,250,250,.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:980px;margin:0 auto;padding:14px 20px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .brand{font-size:14px;letter-spacing:.5px;color:var(--ink-soft);white-space:nowrap;}
+  .brand b{color:var(--ink);font-weight:600;}
+  nav.tabs{display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:3px;}
+  nav.tabs button{
+    border:none;background:transparent;color:var(--ink-soft);
+    padding:6px 16px;border-radius:999px;cursor:pointer;
+    font-size:13px;font-family:inherit;transition:all .18s ease;white-space:nowrap;
+  }
+  nav.tabs button:hover{color:var(--ink);}
+  nav.tabs button.on{background:var(--ink);color:#fff;}
+
+  /* ---------- 页头 ---------- */
+  .page-head{padding:52px 0 28px;text-align:center;}
+  .page-head h1{font-size:26px;font-weight:600;letter-spacing:1px;}
+  .page-head .sub{margin-top:10px;color:var(--ink-faint);font-size:13px;letter-spacing:2px;}
+  .page-head .quote{margin-top:22px;color:var(--ink-soft);font-size:13px;letter-spacing:1.5px;}
+  .page-head .quote::before,.page-head .quote::after{content:"";display:inline-block;width:26px;height:1px;background:var(--line);vertical-align:middle;margin:0 12px;}
+
+  /* ---------- 统计条 ---------- */
+  .stat-bar{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 22px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;
+    box-shadow:0 1px 3px rgba(0,0,0,.02);
+  }
+  .stat-num{display:flex;align-items:baseline;gap:6px;white-space:nowrap;}
+  .stat-num .n{font-size:26px;font-weight:600;letter-spacing:.5px;}
+  .stat-num .d{font-size:13px;color:var(--ink-faint);}
+  .stat-mid{flex:1;min-width:180px;}
+  .progress-track{height:5px;background:var(--line-soft);border-radius:99px;overflow:hidden;}
+  .progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .5s ease;}
+  .progress-label{margin-top:7px;font-size:12px;color:var(--ink-faint);display:flex;justify-content:space-between;}
+  .stat-chapter{
+    font-size:13px;color:var(--ink-soft);white-space:nowrap;
+    padding:6px 14px;border:1px solid var(--line);border-radius:999px;background:#fbfbfb;
+  }
+  .stat-chapter b{color:var(--ink);font-weight:500;}
+
+  /* ---------- 工具行 ---------- */
+  .tools{display:flex;align-items:center;gap:10px;margin:22px 0 6px;flex-wrap:wrap;}
+  .search-box{
+    display:flex;align-items:center;gap:8px;flex:1;min-width:200px;max-width:320px;
+    background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:8px 16px;
+    transition:border-color .18s;
+  }
+  .search-box:focus-within{border-color:#c8d8e8;}
+  .search-box svg{flex:none;opacity:.45;}
+  .search-box input{border:none;outline:none;background:transparent;font-family:inherit;font-size:13px;color:var(--ink);width:100%;}
+  .search-box input::placeholder{color:var(--ink-faint);}
+  select.filter{
+    appearance:none;-webkit-appearance:none;
+    background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M1 3l4 4 4-4' fill='none' stroke='%239a9a9a' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center;
+    border:1px solid var(--line);border-radius:999px;padding:8px 36px 8px 16px;
+    font-family:inherit;font-size:13px;color:var(--ink-soft);cursor:pointer;outline:none;
+    transition:border-color .18s;
+  }
+  select.filter:hover{border-color:#d8d8d8;}
+  select.filter:focus{border-color:#c8d8e8;}
+
+  /* ---------- 事项网格 ---------- */
+  .cat-title{
+    margin:26px 0 14px;display:flex;align-items:center;gap:12px;
+    font-size:13px;color:var(--ink-faint);letter-spacing:2px;
+  }
+  .cat-title::after{content:"";flex:1;height:1px;background:var(--line);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:12px;}
+  .card{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 15px;cursor:pointer;position:relative;
+    box-shadow:0 1px 2px rgba(0,0,0,.015);
+    transition:box-shadow .18s ease,transform .18s ease,border-color .18s ease;
+    display:flex;flex-direction:column;gap:8px;min-height:104px;
+    text-align:left;font-family:inherit;
+  }
+  .card:hover{box-shadow:0 4px 14px rgba(0,0,0,.06);transform:translateY(-1px);border-color:#e0e0e0;}
+  .card:active{transform:translateY(0);}
+  .card-top{display:flex;align-items:center;justify-content:space-between;}
+  .card-num{font-size:11px;color:var(--ink-faint);letter-spacing:1px;font-family:Georgia,serif;}
+  .card-marks{display:flex;gap:6px;align-items:center;}
+  .mark-photo{opacity:.5;}
+  .mark-mood{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--ink-faint);display:inline-block;opacity:.55;}
+  .mark-mood.m-happy{border-color:#d9a94e;}
+  .card-name{font-size:13.5px;line-height:1.5;color:var(--ink);flex:1;word-break:break-all;}
+  .card.done .card-name{color:#4a4a4a;}
+  .card-bot{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;}
+  .pill{
+    font-size:11px;padding:2.5px 10px;border-radius:999px;border:1px solid;letter-spacing:.5px;white-space:nowrap;
+  }
+  .pill.todo{background:var(--c-todo-bg);color:var(--c-todo-tx);border-color:var(--c-todo-bd);}
+  .pill.wait{background:var(--c-wait-bg);color:var(--c-wait-tx);border-color:var(--c-wait-bd);}
+  .pill.done{background:var(--c-done-bg);color:var(--c-done-tx);border-color:var(--c-done-bd);}
+  .pill.later{background:var(--c-later-bg);color:var(--c-later-tx);border-color:var(--c-later-bd);}
+  .card-date{font-size:11px;color:var(--ink-faint);white-space:nowrap;}
+  .card.s-done{border-color:#efe6cc;}
+  .card.s-wait{border-color:#e0ecf7;}
+  .card.s-later{border-color:#e2dded;}
+  .grid-empty{
+    grid-column:1/-1;text-align:center;padding:60px 0;color:var(--ink-faint);font-size:13px;letter-spacing:1px;
+  }
+
+  /* ---------- 弹窗 ---------- */
+  .modal-mask{
+    position:fixed;inset:0;background:rgba(40,40,40,.32);z-index:100;
+    display:flex;align-items:flex-start;justify-content:center;padding:6vh 16px 16px;
+    opacity:0;pointer-events:none;transition:opacity .2s ease;overflow-y:auto;
+  }
+  .modal-mask.show{opacity:1;pointer-events:auto;}
+  .modal{
+    background:var(--paper);border-radius:14px;width:100%;max-width:520px;
+    box-shadow:0 18px 50px rgba(0,0,0,.14);
+    transform:translateY(10px);transition:transform .22s ease;
+  }
+  .modal-mask.show .modal{transform:translateY(0);}
+  .modal-head{padding:20px 24px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .modal-head .m-num{font-size:11px;color:var(--ink-faint);letter-spacing:1.5px;font-family:Georgia,serif;}
+  .modal-head h3{font-size:16px;font-weight:600;margin-top:2px;}
+  .modal-close{
+    border:none;background:var(--line-soft);width:28px;height:28px;border-radius:50%;
+    cursor:pointer;color:var(--ink-soft);font-size:14px;line-height:1;flex:none;
+    transition:background .15s;
+  }
+  .modal-close:hover{background:#e6e6e6;color:var(--ink);}
+  .modal-body{padding:18px 24px 24px;display:flex;flex-direction:column;gap:18px;}
+  .field label{display:block;font-size:12px;color:var(--ink-faint);letter-spacing:1px;margin-bottom:8px;}
+  .status-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .status-row button{
+    border:1px solid var(--line);background:#fbfbfb;border-radius:8px;padding:8px 4px;
+    font-family:inherit;font-size:12.5px;color:var(--ink-soft);cursor:pointer;transition:all .15s;
+  }
+  .status-row button:hover{border-color:#ddd;}
+  .status-row button.on.f-todo{background:var(--c-todo-bg);border-color:var(--c-todo-bd);color:var(--c-todo-tx);}
+  .status-row button.on.f-wait{background:var(--c-wait-bg);border-color:var(--c-wait-bd);color:var(--c-wait-tx);}
+  .status-row button.on.f-done{background:var(--c-done-bg);border-color:var(--c-done-bd);color:var(--c-done-tx);}
+  .status-row button.on.f-later{background:var(--c-later-bg);border-color:var(--c-later-bd);color:var(--c-later-tx);}
+  input[type=date]{
+    font-family:inherit;font-size:13px;color:var(--ink);
+    border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:#fbfbfb;outline:none;
+    transition:border-color .15s;
+  }
+  input[type=date]:focus{border-color:#c8d8e8;}
+  .mood-grid{display:flex;flex-wrap:wrap;gap:8px;}
+  .mood-grid button{
+    border:1px solid var(--line);background:#fbfbfb;border-radius:999px;
+    padding:5px 14px;font-family:inherit;font-size:12.5px;color:var(--ink-soft);cursor:pointer;
+    transition:all .15s;
+  }
+  .mood-grid button:hover{border-color:#ddd;}
+  .mood-grid button.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+  textarea.note{
+    width:100%;min-height:76px;resize:vertical;
+    font-family:inherit;font-size:13px;color:var(--ink);line-height:1.7;
+    border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fbfbfb;outline:none;
+    transition:border-color .15s;
+  }
+  textarea.note:focus{border-color:#c8d8e8;}
+  .photo-area{display:flex;flex-direction:column;gap:10px;}
+  .photo-thumbs{display:flex;flex-wrap:wrap;gap:10px;}
+  .thumb{position:relative;width:86px;height:64px;border-radius:8px;overflow:hidden;border:1px solid var(--line);}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .thumb .del{
+    position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;
+    border:none;background:rgba(255,255,255,.9);color:var(--ink-soft);font-size:11px;line-height:1;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .thumb .del:hover{background:#fff;color:var(--ink);}
+  .photo-add{
+    align-self:flex-start;border:1px dashed #d5d5d5;border-radius:8px;background:#fbfbfb;
+    padding:8px 16px;font-family:inherit;font-size:12.5px;color:var(--ink-soft);cursor:pointer;
+    transition:all .15s;
+  }
+  .photo-add:hover{border-color:#bbb;color:var(--ink);}
+  .modal-foot{display:flex;gap:10px;justify-content:flex-end;padding:0 24px 24px;}
+  .btn{
+    border:1px solid var(--line);background:var(--paper);border-radius:999px;
+    padding:9px 26px;font-family:inherit;font-size:13px;color:var(--ink-soft);cursor:pointer;
+    transition:all .15s;
+  }
+  .btn:hover{color:var(--ink);border-color:#d5d5d5;}
+  .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .btn.primary:hover{background:#444;}
+
+  /* toast */
+  .toast{
+    position:fixed;left:50%;bottom:40px;transform:translateX(-50%) translateY(16px);
+    background:var(--ink);color:#fff;font-size:13px;letter-spacing:1px;
+    padding:10px 26px;border-radius:999px;z-index:200;opacity:0;
+    transition:all .3s ease;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ---------- 第二页 ---------- */
+  .chapter-hero{
+    background:var(--paper);border:1px solid var(--line);border-radius:14px;
+    padding:38px 34px 30px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.02);
+  }
+  .chapter-hero .lv{font-size:13px;letter-spacing:3px;color:var(--ink-faint);}
+  .chapter-hero h2{font-size:24px;font-weight:600;margin-top:8px;letter-spacing:1px;}
+  .chapter-hero .say{margin-top:12px;color:var(--ink-soft);font-size:13.5px;}
+  .chapter-hero .cnt{margin-top:18px;font-size:13px;color:var(--ink-faint);}
+  .chapter-hero .cnt b{color:var(--ink);font-size:18px;font-weight:600;margin:0 2px;}
+
+  .roadmap{margin-top:44px;padding:0 8px;}
+  .road-track{position:relative;height:2px;background:var(--line-soft);border-radius:99px;margin:0 30px;}
+  .road-fill{position:absolute;left:0;top:0;height:100%;background:var(--accent);border-radius:99px;transition:width .5s ease;}
+  .road-nodes{display:flex;justify-content:space-between;margin-top:-7px;position:relative;}
+  .road-node{display:flex;flex-direction:column;align-items:center;gap:10px;flex:1;min-width:0;}
+  .road-dot{width:12px;height:12px;border-radius:50%;background:var(--paper);border:2px solid var(--line);transition:all .3s;}
+  .road-node.passed .road-dot{border-color:var(--accent);background:#e3effa;}
+  .road-node.current .road-dot{border-color:var(--accent);background:var(--accent);box-shadow:0 0 0 4px rgba(124,156,191,.18);}
+  .road-name{font-size:12px;color:var(--ink-faint);letter-spacing:1px;white-space:nowrap;}
+  .road-node.passed .road-name{color:var(--ink-soft);}
+  .road-node.current .road-name{color:var(--ink);font-weight:600;}
+
+  .sec-title{margin:56px 0 20px;display:flex;align-items:center;gap:12px;font-size:14px;color:var(--ink);letter-spacing:2px;font-weight:600;}
+  .sec-title::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  .stats3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .stat-card{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 24px;box-shadow:0 1px 3px rgba(0,0,0,.02);
+  }
+  .stat-card .t{font-size:12px;color:var(--ink-faint);letter-spacing:2px;}
+  .stat-card .v{margin-top:12px;font-size:20px;font-weight:600;letter-spacing:.5px;line-height:1.4;}
+  .stat-card .v small{font-size:12px;color:var(--ink-faint);font-weight:400;margin-left:2px;}
+  .tag-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .tag{
+    font-size:12.5px;color:var(--ink-soft);background:#f6f6f6;
+    border:1px solid var(--line);border-radius:999px;padding:4px 14px;letter-spacing:1px;
+  }
+
+  .letter{
+    background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:30px 34px;box-shadow:0 1px 3px rgba(0,0,0,.02);
+  }
+  .letter p{color:var(--ink-soft);font-size:14px;line-height:2;letter-spacing:.5px;text-align:justify;}
+
+  .timeline{display:flex;flex-direction:column;gap:0;}
+  .tl-item{
+    display:flex;gap:18px;background:var(--paper);border:1px solid var(--line);
+    border-radius:var(--radius);padding:16px 20px;cursor:pointer;
+    transition:box-shadow .18s,transform .18s,border-color .18s;
+  }
+  .tl-item:hover{box-shadow:0 4px 14px rgba(0,0,0,.06);transform:translateY(-1px);}
+  .tl-item + .tl-item{margin-top:10px;}
+  .tl-item + .tl-item::before{content:none;}
+  .tl-photo{width:72px;height:54px;border-radius:8px;overflow:hidden;border:1px solid var(--line);flex:none;background:var(--line-soft);}
+  .tl-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+  .tl-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
+  .tl-name{font-size:14px;font-weight:500;color:var(--ink);}
+  .tl-meta{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--ink-faint);flex-wrap:wrap;}
+  .tl-meta .mood{color:var(--c-wait-tx);}
+  .tl-note{font-size:12.5px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  footer.site{margin-top:70px;text-align:center;color:var(--ink-faint);font-size:12px;letter-spacing:2px;line-height:2;}
+
+  /* ---------- 响应式 ---------- */
+  @media (max-width:720px){
+    .wrap{padding:0 14px 60px;}
+    .nav-inner{padding:12px 14px;}
+    .brand{display:none;}
+    .page-head{padding:36px 0 22px;}
+    .page-head h1{font-size:21px;}
+    .page-head .quote::before,.page-head .quote::after{width:14px;margin:0 8px;}
+    .stat-bar{gap:14px;padding:16px 18px;}
+    .stat-num .n{font-size:22px;}
+    .stat-chapter{font-size:12px;padding:5px 12px;}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+    .card{padding:12px 13px;min-height:96px;}
+    .card-name{font-size:13px;}
+    .status-row{grid-template-columns:repeat(2,1fr);}
+    .stats3{grid-template-columns:1fr;}
+    .chapter-hero{padding:30px 22px 26px;}
+    .chapter-hero h2{font-size:20px;}
+    .road-name{font-size:11px;transform:scale(.92);}
+    .tl-photo{width:60px;height:46px;}
+    .letter{padding:24px 22px;}
+    .modal-body{gap:16px;}
+    .tools{margin:18px 0 4px;}
+    .search-box{max-width:none;}
+  }
+  @media (max-width:380px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+  }
+
+/* ===== PWA / 备份 新增样式 ===== */
+.install-btn{font:inherit;font-size:13px;padding:0 14px;height:34px;border:1px solid #ddd5c7;background:#fff;
+  color:#6b5b4b;border-radius:999px;cursor:pointer;white-space:nowrap}
+.install-btn:hover{background:#faf6ee}
+.tool-btns{display:flex;gap:8px;flex-wrap:wrap}
+.tbtn{font:inherit;font-size:13px;padding:0 12px;height:36px;min-width:44px;border:1px solid #ddd5c7;
+  background:#fff;color:#6b5b4b;border-radius:10px;cursor:pointer;white-space:nowrap}
+.tbtn:hover{background:#faf6ee}
+.backup-card{border:1px solid #e6dfd1;background:#fffdf8;border-radius:14px;padding:16px 18px}
+.backup-card .tip{margin:0 0 12px;font-size:13px;line-height:1.8;color:#8a7d6c}
+.backup-btns{display:flex;gap:10px;flex-wrap:wrap}
+.btn.danger{background:#fff;border-color:#e3b3a6;color:#a35c46}
+.btn.danger:hover{background:#fdf3f0}
+@media(max-width:768px){
+  .install-btn{height:38px}
+  .tbtn{height:44px;font-size:15px}
+  .btn{height:44px}
+}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="nav-inner">
+    <div class="brand"><b>100 件小事</b> · 大学手账</div>
+    <nav class="tabs">
+      <button class="on" id="tab-list" onclick="switchTab('list')">100 件小事</button>
+      <button id="tab-chapter" onclick="switchTab('chapter')">我的大学章节</button>
+    </nav>
+    <button class="install-btn" id="install-btn" onclick="installApp()" style="display:none">装到桌面</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ================= 第一页 ================= -->
+  <section id="page-list">
+    <div class="page-head">
+      <h1 class="serif">大学四年，想做的 100 件小事</h1>
+      <div class="sub">慢慢完成，也慢慢记住。</div>
+      <div class="quote serif">有些事情不是为了完成，而是为了记住。</div>
+    </div>
+
+    <div class="stat-bar">
+      <div class="stat-num"><span class="n" id="stat-count">0</span><span class="d">/ 100 已珍藏</span></div>
+      <div class="stat-mid">
+        <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label"><span id="progress-pct">0%</span><span id="progress-next"></span></div>
+      </div>
+      <div class="stat-chapter" id="stat-chapter">第一章 · 初见</div>
+    </div>
+
+    <div class="tools">
+      <div class="search-box">
+        <svg fill="none" height="14" viewBox="0 0 14 14" width="14"><circle cx="6" cy="6" r="4.5" stroke="#6b6b6b" stroke-width="1.4"/><path d="M9.5 9.5L13 13" stroke="#6b6b6b" stroke-linecap="round" stroke-width="1.4"/></svg>
+        <input id="search-input" oninput="renderList()" placeholder="搜索一件小事…" type="text">
+      </div>
+      <select class="filter" id="cat-filter" onchange="renderList()">
+        <option value="全部">全部</option>
+      </select>
+      <div class="tool-btns">
+        <button class="tbtn" onclick="exportBackup()">导出备份</button>
+        <button class="tbtn" onclick="importBackup()">导入恢复</button>
+      </div>
+    </div>
+
+    <div id="list-body"></div>
+  </section>
+
+  <!-- ================= 第二页 ================= -->
+  <section id="page-chapter" style="display:none">
+    <div class="page-head">
+      <h1 class="serif">我的大学章节</h1>
+      <div class="sub">一步一步，都是走过的路。</div>
+    </div>
+
+    <div class="chapter-hero">
+      <div class="lv" id="ch-lv">Lv.1</div>
+      <h2 class="serif" id="ch-name">第一章 · 初见</h2>
+      <div class="say" id="ch-say">你正在慢慢认识这所校园。</div>
+      <div class="cnt">已珍藏 <b id="ch-count">0</b>/100 件 · <span id="ch-left"></span></div>
+    </div>
+
+    <div class="roadmap">
+      <div class="road-track"><div class="road-fill" id="road-fill"></div></div>
+      <div class="road-nodes" id="road-nodes"></div>
+    </div>
+
+    <div class="sec-title">此刻的大学</div>
+    <div class="stats3">
+      <div class="stat-card">
+        <div class="t">已经珍藏</div>
+        <div class="v" id="s-done">0 <small>件小事</small></div>
+      </div>
+      <div class="stat-card">
+        <div class="t">最近的心情</div>
+        <div class="v" id="s-mood">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="t">我的大学关键词</div>
+        <div class="tag-list" id="s-kw"></div>
+      </div>
+    </div>
+
+    <div class="sec-title">写给现在的自己</div>
+    <div class="letter">
+      <p class="serif" id="letter-text"></p>
+    </div>
+
+    <div class="sec-title">最近珍藏</div>
+    <div class="timeline" id="timeline"></div>
+
+    <div class="sec-title">数据与备份</div>
+    <div class="backup-card">
+      <p class="tip">记录保存在这台设备的浏览器本地，不上传任何服务器。换设备、清理浏览器数据之前，记得先导出备份。</p>
+      <div class="backup-btns">
+        <button class="btn" onclick="exportBackup()">导出 JSON 备份</button>
+        <button class="btn" onclick="importBackup()">导入恢复</button>
+        <button class="btn danger" onclick="resetAll()">清空并恢复初始清单</button>
+      </div>
+    </div>
+
+    <footer class="site">
+      大学四年，想做的 100 件小事<br>
+      有些事情不是为了完成，而是为了记住。
+    </footer>
+  </section>
+</div>
+
+<!-- 记录面板 -->
+<div class="modal-mask" id="modal-mask">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="m-num" id="m-num"></div>
+        <h3 class="serif" id="m-name"></h3>
+      </div>
+      <button aria-label="关闭" class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>状态</label>
+        <div class="status-row" id="m-status">
+          <button class="f-todo" data-v="todo">想去做</button>
+          <button class="f-wait" data-v="wait">等待发生</button>
+          <button class="f-done" data-v="done">已经珍藏</button>
+          <button class="f-later" data-v="later">留给以后</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>完成日期</label>
+        <input id="m-date" type="date">
+      </div>
+      <div class="field">
+        <label>当时的心情</label>
+        <div class="mood-grid" id="m-mood"></div>
+      </div>
+      <div class="field">
+        <label>一句话记录</label>
+        <textarea class="note" id="m-note" maxlength="100" placeholder="那天发生了什么…"></textarea>
+      </div>
+      <div class="field photo-area">
+        <label>照片</label>
+        <div class="photo-thumbs" id="m-photos"></div>
+        <button class="photo-add" onclick="document.getElementById('m-file').click()">＋ 添加照片</button>
+        <input accept="image/*" id="m-file" multiple onchange="onPickPhotos(event)" type="file" style="display:none">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn primary" onclick="saveRecord()">保存记录</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">已保存</div>
+
+<script>
+
+/* ============ 数据层（本地存储：localStorage + IndexedDB 照片） ============ */
+var STORE_KEY = "college100_v1_data";
+var DRAFT_KEY = "college100_v1_draft";
+var PHOTO_DB = "college100_photos", PHOTO_STORE = "p";
+var photoCache = {};
+
+var CATS = ["校园时光","青春日常","朋友之间","一个人的浪漫","小小远方","关于热爱","勇敢一点","感受世界","留下痕迹","好好告别"];
+var MOODS = ["平静","期待","惊喜","感动","放松","疲惫","迷茫","想念","自由","其他"];
+
+var STATUS_TEXT = {todo:"想去做", wait:"等待发生", done:"已经珍藏", later:"留给以后"};
+var REV_STATUS = {"想去做":"todo", "等待发生":"wait", "已经珍藏":"done", "留给以后":"later"};
+
+var CHAPTERS = [
+  {lv:1,name:"第一章 · 初见",say:"你正在慢慢认识这所校园。",min:0},
+  {lv:2,name:"第二章 · 相遇",say:"你开始遇见喜欢的人和事。",min:20},
+  {lv:3,name:"第三章 · 生长",say:"你正在成为更完整的自己。",min:40},
+  {lv:4,name:"第四章 · 远行",say:"你走出了熟悉的生活半径。",min:60},
+  {lv:5,name:"第五章 · 珍藏",say:"你的大学已经有了许多故事。",min:80},
+  {lv:6,name:"终章 · 满载而归",say:"这一段青春，值得被好好记住。",min:100}
+];
+
+var SEED = [{"no":1,"name":"看一次校园日出","cat":"校园时光","st":"已经珍藏","date":"2026-09-16","mood":"期待","note":"和室友五点爬起来，天一点点亮起来。"},{"no":2,"name":"等一场校园日落","cat":"校园时光","st":"已经珍藏","date":"2026-10-15","mood":"平静","note":"操场的广播刚好放到那首老歌。"},{"no":3,"name":"在操场吹晚风","cat":"校园时光","st":"已经珍藏","date":"2026-10-18","mood":"放松","note":"晚风很软，什么都不用想。"},{"no":4,"name":"雨后逛一圈校园","cat":"校园时光","st":"想去做","date":"","mood":"","note":""},{"no":5,"name":"拍下四季的同一个角落","cat":"校园时光","st":"想去做","date":"","mood":"","note":""},{"no":6,"name":"走遍学校每条小路","cat":"校园时光","st":"想去做","date":"","mood":"","note":""},{"no":7,"name":"在长椅上发一次呆","cat":"校园时光","st":"想去做","date":"","mood":"","note":""},{"no":8,"name":"听一次校园广播","cat":"校园时光","st":"想去做","date":"","mood":"","note":""},{"no":9,"name":"去一次学校天台","cat":"校园时光","st":"想去做","date":"","mood":"","note":""},{"no":10,"name":"和校门认真合影","cat":"校园时光","st":"想去做","date":"","mood":"","note":""},{"no":11,"name":"早起吃一次早餐","cat":"青春日常","st":"想去做","date":"","mood":"","note":""},{"no":12,"name":"穿睡衣去拿外卖","cat":"青春日常","st":"想去做","date":"","mood":"","note":""},{"no":13,"name":"在食堂发现隐藏菜单","cat":"青春日常","st":"想去做","date":"","mood":"","note":""},{"no":14,"name":"尝遍学校所有食堂","cat":"青春日常","st":"想去做","date":"","mood":"","note":""},{"no":15,"name":"在宿舍吃一次火锅","cat":"青春日常","st":"想去做","date":"","mood":"","note":""},{"no":16,"name":"为室友庆祝生日","cat":"青春日常","st":"想去做","date":"","mood":"","note":""},{"no":17,"name":"熬夜聊一次真心话","cat":"青春日常","st":"想去做","date":"","mood":"","note":""},{"no":18,"name":"一起看一场老电影","cat":"青春日常","st":"想去做","date":"","mood":"","note":""},{"no":19,"name":"拍一张宿舍全家福","cat":"青春日常","st":"想去做","date":"","mood":"","note":""},{"no":20,"name":"认真布置一次寝室","cat":"青春日常","st":"想去做","date":"","mood":"","note":""},{"no":21,"name":"认识一个不同专业的人","cat":"朋友之间","st":"想去做","date":"","mood":"","note":""},{"no":22,"name":"和朋友交换一本书","cat":"朋友之间","st":"想去做","date":"","mood":"","note":""},{"no":23,"name":"给朋友写一封信","cat":"朋友之间","st":"想去做","date":"","mood":"","note":""},{"no":24,"name":"一起完成一张拼图","cat":"朋友之间","st":"想去做","date":"","mood":"","note":""},{"no":25,"name":"一起去陌生的地方","cat":"朋友之间","st":"想去做","date":"","mood":"","note":""},{"no":26,"name":"为朋友准备小惊喜","cat":"朋友之间","st":"想去做","date":"","mood":"","note":""},{"no":27,"name":"和老朋友见一面","cat":"朋友之间","st":"想去做","date":"","mood":"","note":""},{"no":28,"name":"认真说一次谢谢","cat":"朋友之间","st":"想去做","date":"","mood":"","note":""},{"no":29,"name":"勇敢说一次对不起","cat":"朋友之间","st":"想去做","date":"","mood":"","note":""},{"no":30,"name":"留下一段朋友的声音","cat":"朋友之间","st":"想去做","date":"","mood":"","note":""},{"no":31,"name":"一个人看场电影","cat":"一个人的浪漫","st":"想去做","date":"","mood":"","note":""},{"no":32,"name":"一个人逛博物馆","cat":"一个人的浪漫","st":"想去做","date":"","mood":"","note":""},{"no":33,"name":"一个人去看花","cat":"一个人的浪漫","st":"想去做","date":"","mood":"","note":""},{"no":34,"name":"一个人吃顿好饭","cat":"一个人的浪漫","st":"想去做","date":"","mood":"","note":""},{"no":35,"name":"一个人散步到天黑","cat":"一个人的浪漫","st":"想去做","date":"","mood":"","note":""},{"no":36,"name":"找到自己的秘密基地","cat":"一个人的浪漫","st":"想去做","date":"","mood":"","note":""},{"no":37,"name":"买一束花送给自己","cat":"一个人的浪漫","st":"想去做","date":"","mood":"","note":""},{"no":38,"name":"写一封信给未来","cat":"一个人的浪漫","st":"想去做","date":"","mood":"","note":""},{"no":39,"name":"记录一个普通下午","cat":"一个人的浪漫","st":"想去做","date":"","mood":"","note":""},{"no":40,"name":"和自己拍一张合照","cat":"一个人的浪漫","st":"想去做","date":"","mood":"","note":""},{"no":41,"name":"坐一次绿皮火车","cat":"小小远方","st":"想去做","date":"","mood":"","note":""},{"no":42,"name":"去一座陌生城市","cat":"小小远方","st":"想去做","date":"","mood":"","note":""},{"no":43,"name":"看一次真正的大海","cat":"小小远方","st":"想去做","date":"","mood":"","note":""},{"no":44,"name":"爬一座不高的山","cat":"小小远方","st":"想去做","date":"","mood":"","note":""},{"no":45,"name":"在山顶等日出","cat":"小小远方","st":"想去做","date":"","mood":"","note":""},{"no":46,"name":"看一次漫天星星","cat":"小小远方","st":"想去做","date":"","mood":"","note":""},{"no":47,"name":"去郊外野餐","cat":"小小远方","st":"想去做","date":"","mood":"","note":""},{"no":48,"name":"沿着河边散步","cat":"小小远方","st":"想去做","date":"","mood":"","note":""},{"no":49,"name":"迷一次不危险的路","cat":"小小远方","st":"想去做","date":"","mood":"","note":""},{"no":50,"name":"带回一张旅行车票","cat":"小小远方","st":"想去做","date":"","mood":"","note":""},{"no":51,"name":"找到一项真正的爱好","cat":"关于热爱","st":"想去做","date":"","mood":"","note":""},{"no":52,"name":"学会一首喜欢的歌","cat":"关于热爱","st":"想去做","date":"","mood":"","note":""},{"no":53,"name":"读完一本厚书","cat":"关于热爱","st":"想去做","date":"","mood":"","note":""},{"no":54,"name":"写完一个小故事","cat":"关于热爱","st":"想去做","date":"","mood":"","note":""},{"no":55,"name":"拍一组喜欢的照片","cat":"关于热爱","st":"想去做","date":"","mood":"","note":""},{"no":56,"name":"画一幅不完美的画","cat":"关于热爱","st":"想去做","date":"","mood":"","note":""},{"no":57,"name":"种活一盆植物","cat":"关于热爱","st":"想去做","date":"","mood":"","note":""},{"no":58,"name":"学会一道拿手菜","cat":"关于热爱","st":"想去做","date":"","mood":"","note":""},{"no":59,"name":"做一件亲手完成的礼物","cat":"关于热爱","st":"想去做","date":"","mood":"","note":""},{"no":60,"name":"坚持一件小事一百天","cat":"关于热爱","st":"想去做","date":"","mood":"","note":""},{"no":61,"name":"在很多人面前发言","cat":"勇敢一点","st":"想去做","date":"","mood":"","note":""},{"no":62,"name":"主动认识一个人","cat":"勇敢一点","st":"想去做","date":"","mood":"","note":""},{"no":63,"name":"对喜欢的人表达心意","cat":"勇敢一点","st":"想去做","date":"","mood":"","note":""},{"no":64,"name":"拒绝一次勉强自己","cat":"勇敢一点","st":"想去做","date":"","mood":"","note":""},{"no":65,"name":"尝试一次新发型","cat":"勇敢一点","st":"想去做","date":"","mood":"","note":""},{"no":66,"name":"穿一次大胆的衣服","cat":"勇敢一点","st":"想去做","date":"","mood":"","note":""},{"no":67,"name":"去参加陌生活动","cat":"勇敢一点","st":"想去做","date":"","mood":"","note":""},{"no":68,"name":"完成一件害怕的事","cat":"勇敢一点","st":"想去做","date":"","mood":"","note":""},{"no":69,"name":"坦然接受一次失败","cat":"勇敢一点","st":"想去做","date":"","mood":"","note":""},{"no":70,"name":"为自己认真争取一次","cat":"勇敢一点","st":"想去做","date":"","mood":"","note":""},{"no":71,"name":"看一场现场演出","cat":"感受世界","st":"想去做","date":"","mood":"","note":""},{"no":72,"name":"听一次街头歌唱","cat":"感受世界","st":"想去做","date":"","mood":"","note":""},{"no":73,"name":"逛一次旧书店","cat":"感受世界","st":"想去做","date":"","mood":"","note":""},{"no":74,"name":"看一次艺术展","cat":"感受世界","st":"想去做","date":"","mood":"","note":""},{"no":75,"name":"参加一次音乐节","cat":"感受世界","st":"想去做","date":"","mood":"","note":""},{"no":76,"name":"看一场话剧","cat":"感受世界","st":"想去做","date":"","mood":"","note":""},{"no":77,"name":"去一次天文馆","cat":"感受世界","st":"想去做","date":"","mood":"","note":""},{"no":78,"name":"观察一次月亮圆缺","cat":"感受世界","st":"想去做","date":"","mood":"","note":""},{"no":79,"name":"在春天认真看花","cat":"感受世界","st":"想去做","date":"","mood":"","note":""},{"no":80,"name":"在冬天等一场雪","cat":"感受世界","st":"想去做","date":"","mood":"","note":""},{"no":81,"name":"拍一张学生证照片","cat":"留下痕迹","st":"想去做","date":"","mood":"","note":""},{"no":82,"name":"保存一张课程表","cat":"留下痕迹","st":"想去做","date":"","mood":"","note":""},{"no":83,"name":"留下第一次获奖证明","cat":"留下痕迹","st":"想去做","date":"","mood":"","note":""},{"no":84,"name":"收藏一张手写便签","cat":"留下痕迹","st":"想去做","date":"","mood":"","note":""},{"no":85,"name":"记录一次心动瞬间","cat":"留下痕迹","st":"想去做","date":"","mood":"","note":""},{"no":86,"name":"做一本大学相册","cat":"留下痕迹","st":"想去做","date":"","mood":"","note":""},{"no":87,"name":"录下校园的声音","cat":"留下痕迹","st":"想去做","date":"","mood":"","note":""},{"no":88,"name":"写一篇年度回忆","cat":"留下痕迹","st":"想去做","date":"","mood":"","note":""},{"no":89,"name":"保存毕业前的聊天记录","cat":"留下痕迹","st":"想去做","date":"","mood":"","note":""},{"no":90,"name":"给大学生活做一段视频","cat":"留下痕迹","st":"想去做","date":"","mood":"","note":""},{"no":91,"name":"和喜欢的老师聊聊天","cat":"好好告别","st":"想去做","date":"","mood":"","note":""},{"no":92,"name":"回一次刚入学的地方","cat":"好好告别","st":"想去做","date":"","mood":"","note":""},{"no":93,"name":"再吃一次最爱的窗口","cat":"好好告别","st":"想去做","date":"","mood":"","note":""},{"no":94,"name":"和室友散一次步","cat":"好好告别","st":"想去做","date":"","mood":"","note":""},{"no":95,"name":"向重要的人表达感谢","cat":"好好告别","st":"想去做","date":"","mood":"","note":""},{"no":96,"name":"穿学士服走遍校园","cat":"好好告别","st":"想去做","date":"","mood":"","note":""},{"no":97,"name":"拍一张毕业合照","cat":"好好告别","st":"想去做","date":"","mood":"","note":""},{"no":98,"name":"写下大学的遗憾","cat":"好好告别","st":"想去做","date":"","mood":"","note":""},{"no":99,"name":"原谅曾经的自己","cat":"好好告别","st":"想去做","date":"","mood":"","note":""},{"no":100,"name":"对大学认真说再见","cat":"好好告别","st":"想去做","date":"","mood":"","note":""}];
+
+var ITEMS = [];     // {id, name, cat, _id}
+var records = {};   // _id → 扁平行
+
+/* ---------- 本地读写 ---------- */
+function loadStore(){
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    if(raw){
+      var d = JSON.parse(raw);
+      if(d && d.records) return d.records;
+    }
+  }catch(e){}
+  return null;
+}
+function saveStore(){
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify({v:1, records: records}));
+    return true;
+  }catch(e){
+    showToast("本地存储空间不足，试试删掉几张照片");
+    return false;
+  }
+}
+function buildFromSeed(){
+  records = {};
+  for(var i=0;i<SEED.length;i++){
+    var s = SEED[i];
+    records[String(s.no)] = {
+      "_id": String(s.no),
+      "编号": s.no,
+      "小事": s.name,
+      "分类": s.cat,
+      "状态": s.st || "想去做",
+      "完成日期": s.date || null,
+      "心情": s.mood || null,
+      "一句话记录": s.note || "",
+      "照片": null
+    };
+  }
+}
+function initData(){
+  var saved = loadStore();
+  if(saved){ records = saved; }
+  else { buildFromSeed(); saveStore(); }
+  ITEMS = Object.keys(records).map(function(k){
+    var r = records[k];
+    return { id: r["编号"], name: r["小事"] || "", cat: r["分类"] || "", _id: k };
+  }).sort(function(a,b){ return a.id - b.id; });
+  buildCatFilter();
+  renderList();
+}
+
+/* ---------- 照片：IndexedDB ---------- */
+function photoDb(){
+  return new Promise(function(resolve, reject){
+    if(!window.indexedDB){ reject(new Error("no idb")); return; }
+    var req = indexedDB.open(PHOTO_DB, 1);
+    req.onupgradeneeded = function(e){
+      var d = e.target.result;
+      if(!d.objectStoreNames.contains(PHOTO_STORE)) d.createObjectStore(PHOTO_STORE);
+    };
+    req.onsuccess = function(){ resolve(req.result); };
+    req.onerror = function(){ reject(req.error); };
+  });
+}
+function putPhoto(key, dataUrl){
+  return photoDb().then(function(db){
+    return new Promise(function(resolve, reject){
+      var tx = db.transaction(PHOTO_STORE, "readwrite");
+      tx.objectStore(PHOTO_STORE).put(dataUrl, key);
+      tx.oncomplete = function(){ photoCache[key] = dataUrl; resolve(key); };
+      tx.onerror = function(){ reject(tx.error); };
+    });
+  });
+}
+function getPhoto(key){
+  if(!key) return Promise.resolve("");
+  if(photoCache[key]) return Promise.resolve(photoCache[key]);
+  return photoDb().then(function(db){
+    return new Promise(function(resolve){
+      var tx = db.transaction(PHOTO_STORE, "readonly");
+      var rq = tx.objectStore(PHOTO_STORE).get(key);
+      rq.onsuccess = function(){ photoCache[key] = rq.result || ""; resolve(photoCache[key]); };
+      rq.onerror = function(){ resolve(""); };
+    });
+  }).catch(function(){ return ""; });
+}
+function resolvePhoto(p){
+  if(!p) return Promise.resolve("");
+  if(p.dataUrl) return Promise.resolve(p.dataUrl);
+  return getPhoto(p.key);
+}
+
+/* ---------- 未提交草稿缓存 ---------- */
+function readDrafts(){
+  try { return JSON.parse(localStorage.getItem(DRAFT_KEY)) || {}; }
+  catch(e) { return {}; }
+}
+function saveDraft(id, date, note){
+  try {
+    var d = readDrafts();
+    d[id] = { date: date, note: note, ts: Date.now() };
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+  } catch(e) {}
+}
+function clearDraft(id){
+  try {
+    var d = readDrafts();
+    delete d[id];
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+  } catch(e) {}
+}
+
+/* ============ 工具函数 ============ */
+const $ = s => document.querySelector(s);
+function recOf(it){ return records[it._id] || {}; }
+function stOf(r){ return REV_STATUS[r["状态"]] || "todo"; }
+function normDate(v){ if(!v) return ""; return String(v).slice(0,10); }
+function moodOf(r){ return r["心情"] || ""; }
+function noteOf(r){ return r["一句话记录"] || ""; }
+function photosOf(r){ return r["照片"] || []; }
+function doneList(){
+  return ITEMS.filter(it => stOf(recOf(it)) === "done")
+    .map(it => ({item:it, r:recOf(it)}))
+    .sort((a,b) => normDate(b.r["完成日期"]).localeCompare(normDate(a.r["完成日期"])));
+}
+function doneCount(){ return ITEMS.filter(it => stOf(recOf(it)) === "done").length; }
+function chapterOf(n){
+  let c = CHAPTERS[0];
+  for(const ch of CHAPTERS){ if(n >= ch.min) c = ch; }
+  return c;
+}
+function fmtDate(d){
+  if(!d) return "";
+  const [y,m,dd] = d.split("-");
+  return `${y.slice(2)}.${m}.${dd}`;
+}
+function showToast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._tm);
+  t._tm = setTimeout(()=>t.classList.remove("show"), 1800);
+}
+
+/* ============ 页面切换 ============ */
+function switchTab(p){
+  $("#tab-list").classList.toggle("on", p==="list");
+  $("#tab-chapter").classList.toggle("on", p==="chapter");
+  $("#page-list").style.display = p==="list" ? "" : "none";
+  $("#page-chapter").style.display = p==="chapter" ? "" : "none";
+  window.scrollTo({top:0});
+  if(p==="chapter") renderChapter();
+}
+
+/* ============ 第一页：列表 ============ */
+const photoIcon = `<svg class="mark-photo" width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="10" rx="1.5" stroke="#6b6b6b" stroke-width="1.2"/><circle cx="4.8" cy="6.5" r="1.2" fill="#6b6b6b"/><path d="M1.5 11l3.2-3 2.6 2.4L9.6 8l3 2.6" stroke="#6b6b6b" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
+
+function buildCatFilter(){
+  const sel = $("#cat-filter");
+  sel.innerHTML = "";
+  const o0 = document.createElement("option");
+  o0.value = "全部"; o0.textContent = "全部";
+  sel.appendChild(o0);
+  for(const c of CATS){
+    const o = document.createElement("option");
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  }
+}
+
+function renderList(){
+  const kw = $("#search-input").value.trim();
+  const cat = $("#cat-filter").value || "全部";
+  const body = $("#list-body");
+  const groups = [];
+  for(const c of (cat==="全部" ? CATS : [cat])){
+    const list = ITEMS.filter(i => i.cat===c &&
+      (!kw || i.name.includes(kw) || String(i.id).padStart(3,"0").includes(kw) || String(i.id)===kw));
+    if(list.length) groups.push({cat:c, list});
+  }
+  let html = "";
+  if(!groups.length){
+    html = `<div class="grid"><div class="grid-empty">没有找到相关的小事</div></div>`;
+  } else {
+    for(const g of groups){
+      html += `<div class="cat-title">${g.cat}</div><div class="grid">`;
+      for(const it of g.list){
+        const r = recOf(it);
+        const st = stOf(r);
+        const rdate = normDate(r["完成日期"]);
+        const rmood = moodOf(r);
+        const rphotos = photosOf(r);
+        const marks = [];
+        if(rphotos.length) marks.push(photoIcon);
+        if(rmood) marks.push(`<span class="mark-mood" title="${rmood}"></span>`);
+        html += `<button class="card s-${st} ${st==='done'?'done':''}" onclick="openModal(${it.id})" title="${it.name}">
+          <div class="card-top"><span class="card-num">№ ${String(it.id).padStart(3,"0")}</span><span class="card-marks">${marks.join("")}</span></div>
+          <div class="card-name">${it.name}</div>
+          <div class="card-bot"><span class="pill ${st}">${STATUS_TEXT[st]}</span>${st==="done"&&rdate?`<span class="card-date">${fmtDate(rdate)}</span>`:""}</div>
+        </button>`;
+      }
+      html += `</div>`;
+    }
+  }
+  body.innerHTML = html;
+  renderStats();
+}
+
+function renderStats(){
+  const n = doneCount();
+  const ch = chapterOf(n);
+  $("#stat-count").textContent = n;
+  $("#progress-fill").style.width = n + "%";
+  $("#progress-pct").textContent = Math.round(n) + "%";
+  $("#stat-chapter").innerHTML = `Lv.${ch.lv} <b>${ch.name}</b>`;
+  const idx = CHAPTERS.indexOf(ch);
+  if(idx < CHAPTERS.length-1){
+    const next = CHAPTERS[idx+1];
+    $("#progress-next").textContent = `距「${next.name.replace(/第.章 · |终章 · /,"")}」还差 ${next.min - n} 件`;
+  } else {
+    $("#progress-next").textContent = "已抵达终章";
+  }
+}
+
+/* ============ 弹窗 ============ */
+let editingId = null;
+let tmpStatus = "todo", tmpMood = "", tmpPhotos = [];
+
+function openModal(id){
+  editingId = id;
+  const it = ITEMS.find(x=>x.id===id);
+  if(!it) return;
+  const r = recOf(it);
+  tmpStatus = stOf(r);
+  tmpMood = moodOf(r);
+  tmpPhotos = photosOf(r).map(p=>({title:p.title||"", key:p.key}));
+  $("#m-num").textContent = `№ ${String(id).padStart(3,"0")} · ${it.cat}`;
+  $("#m-name").textContent = it.name;
+  const draft = readDrafts()[id];
+  $("#m-date").value = draft && draft.date ? draft.date : normDate(r["完成日期"]);
+  $("#m-note").value = draft && typeof draft.note === "string" ? draft.note : noteOf(r);
+  renderModalStatus();
+  renderModalMood();
+  renderModalPhotos();
+  $("#modal-mask").classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+function closeModal(){
+  $("#modal-mask").classList.remove("show");
+  document.body.style.overflow = "";
+  editingId = null;
+}
+$("#modal-mask").addEventListener("click", e => { if(e.target===$("#modal-mask")) closeModal(); });
+document.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
+$("#m-date").addEventListener("input", function(){ if(editingId) saveDraft(editingId, this.value, $("#m-note").value); });
+$("#m-note").addEventListener("input", function(){ if(editingId) saveDraft(editingId, $("#m-date").value, this.value); });
+
+function renderModalStatus(){
+  document.querySelectorAll("#m-status button").forEach(b=>{
+    b.classList.toggle("on", b.dataset.v===tmpStatus);
+  });
+}
+document.querySelectorAll("#m-status button").forEach(b=>{
+  b.addEventListener("click", ()=>{ tmpStatus = b.dataset.v; renderModalStatus(); });
+});
+
+function renderModalMood(){
+  let html = "";
+  for(const m of MOODS){
+    html += `<button class="${m===tmpMood?"on":""}" data-m="${m}">${m}</button>`;
+  }
+  $("#m-mood").innerHTML = html;
+  document.querySelectorAll("#m-mood button").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      tmpMood = tmpMood===b.dataset.m ? "" : b.dataset.m;
+      renderModalMood();
+    });
+  });
+}
+
+async function renderModalPhotos(){
+  let html = "";
+  for(let i=0;i<tmpPhotos.length;i++){
+    const src = await resolvePhoto(tmpPhotos[i]);
+    html += `<div class="thumb"><img src="${src}" alt="照片"><button class="del" onclick="delPhoto(${i})" title="删除照片">✕</button></div>`;
+  }
+  $("#m-photos").innerHTML = html;
+}
+function delPhoto(i){ tmpPhotos.splice(i,1); renderModalPhotos(); }
+
+function onPickPhotos(e){
+  const files = Array.from(e.target.files || []);
+  if(!files.length) return;
+  if(tmpPhotos.length + files.length > 9){ showToast("最多 9 张照片"); e.target.value = ""; return; }
+  let remain = files.length;
+  const doneOne = () => { if(--remain === 0) renderModalPhotos(); };
+  for(const f of files){
+    shrinkFile(f, (dataUrl, fileName) => {
+      const key = "p_" + Date.now() + "_" + Math.random().toString(36).slice(2,8);
+      putPhoto(key, dataUrl)
+        .then(()=>{ tmpPhotos.push({ title: fileName, key: key }); doneOne(); })
+        .catch(()=>{ showToast("照片保存失败，请重试"); doneOne(); });
+    });
+  }
+  e.target.value = "";
+}
+function shrinkFile(file, cb){
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const raw = String(ev.target.result || "");
+    const img = new Image();
+    img.onload = ()=>{
+      const MAX = 800;
+      let w = img.width, h = img.height;
+      if(Math.max(w,h) > MAX){ const k = MAX/Math.max(w,h); w = Math.round(w*k); h = Math.round(h*k); }
+      const cv = document.createElement("canvas");
+      cv.width = w; cv.height = h;
+      cv.getContext("2d").drawImage(img, 0, 0, w, h);
+      try{ cb(cv.toDataURL("image/jpeg", 0.8), file.name); }
+      catch(e){ cb(raw, file.name); }
+    };
+    img.onerror = ()=>cb(raw, file.name);
+    img.src = raw;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveRecord(){
+  const it = ITEMS.find(x=>x.id===editingId);
+  if(!it) return;
+  const dateVal = $("#m-date").value || "";
+  const noteVal = $("#m-note").value.trim();
+  const row = records[it._id];
+  row["状态"] = STATUS_TEXT[tmpStatus];
+  row["完成日期"] = dateVal || null;
+  row["心情"] = tmpMood || null;
+  row["一句话记录"] = noteVal;
+  row["照片"] = tmpPhotos.length ? tmpPhotos.map(p=>({title:p.title, key:p.key})) : null;
+  if(!saveStore()) return;
+  clearDraft(it._id);
+  closeModal();
+  renderList();
+  showToast("已保存");
+}
+
+/* ============ 第二页：章节 ============ */
+const ROAD_NAMES = ["初见","相遇","生长","远行","珍藏","满载而归"];
+const KW_DICT = ["晚风","日落","日出","朋友","食堂","书","信","电影","花","山","河","城市","旅行","夏天","冬天","春天","夜","窗","风","海","歌","画","照片"];
+
+function renderChapter(){
+  const n = doneCount();
+  const ch = chapterOf(n);
+  const idx = CHAPTERS.indexOf(ch);
+  const done = doneList();
+
+  $("#ch-lv").textContent = `Lv.${ch.lv}`;
+  $("#ch-name").textContent = ch.name;
+  $("#ch-say").textContent = `“${ch.say}”`;
+  $("#ch-count").textContent = n;
+  if(idx < 5){
+    $("#ch-left").textContent = `距离下一章还差 ${CHAPTERS[idx+1].min - n} 件`;
+  } else {
+    $("#ch-left").textContent = "已经走完了全部章节";
+  }
+
+  const pct = idx / 5 * 100;
+  $("#road-fill").style.width = pct + "%";
+  let nodes = "";
+  ROAD_NAMES.forEach((nm,i)=>{
+    const cls = i < idx ? "passed" : (i===idx ? "current passed" : "");
+    nodes += `<div class="road-node ${cls}"><div class="road-dot"></div><div class="road-name">${nm}</div></div>`;
+  });
+  $("#road-nodes").innerHTML = nodes;
+
+  $("#s-done").innerHTML = `${n} <small>件小事</small>`;
+
+  const moodCount = {};
+  done.forEach(d => { const m = moodOf(d.r); if(m) moodCount[m] = (moodCount[m]||0)+1; });
+  const topMoods = Object.entries(moodCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(x=>x[0]);
+  $("#s-mood").textContent = topMoods.length ? topMoods.join(" · ") : "还没有记录";
+
+  const kwCount = {};
+  for(const d of done){
+    const text = d.item.name + noteOf(d.r);
+    for(const k of KW_DICT){
+      if(text.includes(k)) kwCount[k] = (kwCount[k]||0)+1;
+    }
+  }
+  const kws = Object.entries(kwCount)
+    .sort((a,b)=> b[1]-a[1] || KW_DICT.indexOf(a[0])-KW_DICT.indexOf(b[0]))
+    .slice(0,5).map(x=>x[0]);
+  $("#s-kw").innerHTML = kws.length
+    ? kws.map(k=>`<span class="tag">${k}</span>`).join("")
+    : `<span class="tag">等待被写下</span>`;
+
+  $("#letter-text").textContent = buildLetter(n, ch, kws, done);
+
+  const tl = $("#timeline");
+  if(!done.length){
+    tl.innerHTML = `<div class="grid-empty" style="padding:40px 0">还没有珍藏的小事，从第一件开始吧。</div>`;
+    return;
+  }
+  let html = "";
+  for(const d of done.slice(0,8)){
+    const ph = photosOf(d.r);
+    const photo = (ph && ph[0]) ? `<div class="tl-photo"><img data-pk="${ph[0].key||''}" src="" alt=""></div>` : "";
+    html += `<div class="tl-item" onclick="openModal(${d.item.id})">
+      ${photo}
+      <div class="tl-main">
+        <div class="tl-name">${d.item.name}</div>
+        <div class="tl-meta"><span>${normDate(d.r["完成日期"])||""}</span>${moodOf(d.r)?`<span class="mood">${moodOf(d.r)}</span>`:""}</div>
+        ${noteOf(d.r)?`<div class="tl-note">${noteOf(d.r)}</div>`:""}
+      </div>
+    </div>`;
+  }
+  tl.innerHTML = html;
+  fillTimelinePhotos();
+}
+
+function fillTimelinePhotos(){
+  document.querySelectorAll("#timeline img[data-pk]").forEach(img=>{
+    const k = img.getAttribute("data-pk");
+    if(!k) { img.remove(); return; }
+    getPhoto(k).then(src=>{
+      if(src) img.src = src; else img.remove();
+    });
+  });
+}
+
+function buildLetter(n, ch, kws, done){
+  const recent = done.slice(0,3).map(d=>d.item.name);
+  let s = "";
+  if(n === 0){
+    return "清单还是崭新的。不用着急，大学很长，慢慢来。从第一件小事开始，把它轻轻放进回忆里。";
+  }
+  s += `到现在，你已经把 ${n} 件小事好好收了起来。`;
+  if(kws.length){
+    s += `翻看这些记录，${kws.slice(0,4).join("、")}，是这段时间留给你的关键词。`;
+  }
+  if(recent.length){
+    s += `最近的一件，是「${recent[0]}」。`;
+  }
+  if(ch.lv <= 2){
+    s += "你正在慢慢认识这所校园，生活正在长出自己的节奏。";
+  } else if(ch.lv <= 3){
+    s += "你正在成为更完整的自己，也留下了一些值得回头看的痕迹。";
+  } else if(ch.lv <= 4){
+    s += "你走出了熟悉的生活半径，看见的地方比想象中更远。";
+  } else if(ch.lv === 5){
+    s += "你的大学已经有了许多故事，它们都好好地放在这里。";
+  } else {
+    s += "这一段青春，值得被好好记住。";
+  }
+  return s;
+}
+
+/* ============ 备份与恢复 ============ */
+function exportBackup(){
+  const out = {app:"college-100-things", v:1, exportedAt:new Date().toISOString(), records:records, photos:{}};
+  const dump = photoDb().then(function(db){
+    return new Promise(function(resolve){
+      try{
+        const tx = db.transaction(PHOTO_STORE, "readonly");
+        const rq = tx.objectStore(PHOTO_STORE).openCursor();
+        rq.onsuccess = function(e){
+          const c = e.target.result;
+          if(c){ out.photos[c.key] = c.value; c.continue(); }
+          else resolve();
+        };
+        rq.onerror = function(){ resolve(); };
+      }catch(e){ resolve(); }
+    });
+  }).catch(function(){});
+  dump.then(function(){
+    const blob = new Blob([JSON.stringify(out)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "大学100件小事-备份-" + new Date().toISOString().slice(0,10) + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+    showToast("备份已导出");
+  });
+}
+function importBackup(){
+  const inp = document.createElement("input");
+  inp.type = "file";
+  inp.accept = "application/json,.json";
+  inp.onchange = function(){
+    const f = inp.files && inp.files[0];
+    if(!f) return;
+    const fr = new FileReader();
+    fr.onload = function(ev){
+      let data;
+      try{ data = JSON.parse(String(ev.target.result || "")); }
+      catch(e){ showToast("文件格式不正确"); return; }
+      if(!data || !data.records){ showToast("不是有效的备份文件"); return; }
+      records = data.records;
+      saveStore();
+      const photos = data.photos || {};
+      const keys = Object.keys(photos);
+      if(!keys.length){ initData(); showToast("已恢复 " + Object.keys(records).length + " 条记录"); return; }
+      let left = keys.length;
+      photoDb().then(function(db){
+        return new Promise(function(resolve){
+          const tx = db.transaction(PHOTO_STORE, "readwrite");
+          const st = tx.objectStore(PHOTO_STORE);
+          keys.forEach(k=>st.put(photos[k], k));
+          tx.oncomplete = function(){ resolve(); };
+          tx.onerror = function(){ resolve(); };
+        });
+      }).catch(function(){}).then(function(){
+        initData();
+        showToast("已恢复 " + Object.keys(records).length + " 条记录");
+      });
+    };
+    fr.readAsText(f);
+  };
+  inp.click();
+}
+function resetAll(){
+  if(!confirm("会清空全部记录与照片，恢复到最初的 100 件小事。确定吗？")) return;
+  if(!confirm("再确认一次：清空后无法找回，建议先导出备份。确定清空吗？")) return;
+  buildFromSeed();
+  saveStore();
+  photoDb().then(function(db){
+    return new Promise(function(resolve){
+      try{
+        const tx = db.transaction(PHOTO_STORE, "readwrite");
+        tx.objectStore(PHOTO_STORE).clear();
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(){ resolve(); };
+      }catch(e){ resolve(); }
+    });
+  }).catch(function(){}).then(function(){
+    photoCache = {};
+    initData();
+    showToast("已恢复到初始清单");
+  });
+}
+
+/* ============ PWA：离线缓存 + 安装 ============ */
+let deferredPrompt = null;
+window.addEventListener("beforeinstallprompt", function(e){
+  e.preventDefault();
+  deferredPrompt = e;
+  const b = $("#install-btn");
+  if(b) b.style.display = "";
+});
+function installApp(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(){ deferredPrompt = null; });
+  } else {
+    showToast("用浏览器菜单里的「添加到主屏幕」即可");
+  }
+}
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+
+/* ============ 初始化 ============ */
+(function init(){
+  initData();
+})();
+
+
+</script>
+</body>
+</html>
