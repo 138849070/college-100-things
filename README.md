@@ -20,10 +20,10 @@
 
 ## 🌐 在线使用
 
-仓库启用 GitHub Pages 后，访问：
+已启用 GitHub Pages，直接访问：
 
 ```
-https://<你的用户名>.github.io/college-100-things/
+https://138849070.github.io/college-100-things/
 ```
 
 ## 💾 数据说明
