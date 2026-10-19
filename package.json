@@ -1,0 +1,13 @@
+{
+  "name": "college-100-things",
+  "version": "1.0.0",
+  "private": true,
+  "description": "大学四年想做的 100 件小事 · Android App（Capacitor 封装 PWA）",
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}
